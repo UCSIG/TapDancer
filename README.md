@@ -10,8 +10,8 @@
 
 <p align="center">
   <a href="https://github.com/UCSIG/TapDancer/actions/workflows/release.yml"><img src="https://img.shields.io/github/actions/workflow/status/UCSIG/TapDancer/release.yml?label=Build" alt="Build"></a>
-  <a href="https://github.com/UCSIG/TapDancer/releases/latest"><img src="https://img.shields.io/github/v/release/UCSIG/TapDancer?label=Latest%20Release&color=blue" alt="Latest release"></a>
-  <img src="https://img.shields.io/badge/Hardware-v1.0.0-orange" alt="Hardware">
+  <a href="https://github.com/UCSIG/TapDancer/releases/latest"><img src="https://img.shields.io/github/v/release/UCSIG/TapDancer?label=Latest%20Release&color=blue" alt="Latest Release"></a>
+  <img src="https://img.shields.io/badge/Hardware-v1.0.0-green" alt="Hardware">
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
 </p>
 

@@ -195,18 +195,47 @@ jobs:
           path: dist/
 
       - name: Name firmware files by version
+        id: fw
         run: |
-          fw=$(python3 -c "import json; print(json.load(open('dist/firmware/version.json'))['version'])")
+          # version.json holds "major.minor.patch.build"; release names use
+          # major.minor.patch only.
+          fw=$(python3 -c "import json; print('.'.join(json.load(open('dist/firmware/version.json'))['version'].split('.')[:3]))")
           echo "Firmware version: $fw"
+          echo "version=$fw" >> "$GITHUB_OUTPUT"
           for ext in zip hex uf2; do
             mv "dist/firmware/firmware_tapdancer.$ext" "dist/firmware/tapdancer-firmware-v$fw.$ext"
           done
           ls -R dist
 
+      - name: Write release notes
+        env:
+          APP: ${{ needs.version.outputs.app }}
+          FW: ${{ steps.fw.outputs.version }}
+        run: |
+          cat > notes.md <<'EOF'
+          ## Downloads
+
+          | File | Description |
+          | --- | --- |
+          | `tapdancer-v@APP@-android.apk` | Companion app for Android. Install directly on the phone or tablet; Android asks to allow installs from this source. |
+          | `tapdancer-v@APP@-windows.zip` | Companion app for Windows (64-bit, portable). Extract the folder and run `tapdancer.exe`. No installation needed. |
+          | `tapdancer-firmware-v@FW@.zip` | Firmware as a DFU package for updates over Bluetooth, for example with nRF Connect. The companion app already contains this firmware and offers the update itself on Android, iOS and macOS. |
+          | `tapdancer-firmware-v@FW@.uf2` | Firmware for USB drag and drop. Double-tap reset on the XIAO; a USB drive appears. Copy the file onto it. |
+          | `tapdancer-firmware-v@FW@.hex` | Firmware for an SWD programmer (J-Link, nrfjprog). Application only; the bootloader and SoftDevice must already be on the board. |
+
+          The app bundles firmware v@FW@.
+
+          A new board needs the TapDancer bootloader before the firmware can be installed. See [firmware/bootloader](https://github.com/@REPO@/tree/main/firmware/bootloader) for files and instructions.
+
+          EOF
+          sed -i -e "s/@APP@/$APP/g" -e "s/@FW@/$FW/g" -e "s#@REPO@#$GITHUB_REPOSITORY#g" notes.md
+          cat notes.md
+
       - uses: softprops/action-gh-release@v2
         with:
           draft: true
           name: TapDancer v${{ needs.version.outputs.app }}
+          body_path: notes.md
           generate_release_notes: true
           files: |
             dist/android/*.apk
