@@ -3,6 +3,8 @@
 # Miscellaneous
 *.class
 *.lock
+# Commit the lock file so CI builds use the same dependency versions.
+!/pubspec.lock
 *.log
 *.pyc
 *.swp

@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/release-v1.2.0-blue" alt="Release">
-  <img src="https://img.shields.io/badge/firmware-v1.4.2-green" alt="Firmware">
-  <img src="https://img.shields.io/badge/hardware-v1.0.0-orange" alt="Hardware">
-  <img src="https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
+  <img src="https://img.shields.io/badge/Companion App-v1.2.0-blue" alt="Release">
+  <img src="https://img.shields.io/badge/Firmware-v1.4.2-green" alt="Firmware">
+  <img src="https://img.shields.io/badge/Hardware-v1.0.0-orange" alt="Hardware">
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
 </p>
 
 <div align="center">
@@ -40,6 +40,7 @@
   - [Building and flashing](#building-and-flashing)
 - [Companion app](#companion-app)
   - [Building the app](#building-the-app)
+- [Release builds](#release-builds)
 - [Assembly](#assembly)
 - [Configuration protocol](#configuration-protocol)
 - [Contributing](#contributing)
@@ -80,7 +81,7 @@ The PCB sits inside an off-the-shelf Roland DP-2 sustain pedal. The repository c
 | Auto-off | Configurable, 10 min default |
 | Hardware revision | v1.0.0 |
 
-Power measurements are in [`measurements/`](measurements/).
+Power measurements and the R2R DAC calculations are in [`pcb/tapdancer_v1.0/measurements/`](pcb/tapdancer_v1.0/measurements/).
 
 ## Repository layout
 
@@ -89,7 +90,7 @@ app/            Flutter companion app (Android, iOS, Windows, macOS, Linux)
 firmware/       PlatformIO firmware for the XIAO nRF52840, patched bootloader
 pcb/            KiCad project, Gerbers, BOM and plots (tapdancer_v1.0)
 mechanical/     3D-printable battery mount and drilling template
-measurements/   Power consumption measurements
+.github/        GitHub Actions workflow for release builds
 ```
 
 ## Hardware
@@ -162,7 +163,9 @@ With the app you can:
 - Name, reset and delete the 16 configuration slots
 - Adjust double-click and long-press timing per button. A double-click time of `0` enables direct mode, where a press fires immediately.
 - Change device settings: auto-off timeout, maximum number of connections, identify (blink) and factory reset
-- Update the firmware over BLE
+- Export and import configurations as `.tdcfg` files, either a single configuration or all 16 at once
+- Restore earlier configurations from automatic backups. The app saves a backup of the device's configurations each time it connects (the last 20 per device), so an accidental overwrite can be undone.
+- Update the firmware over BLE with the firmware bundled in the app (Android, iOS and macOS)
 
 The app is written in Flutter and uses [`universal_ble`](https://pub.dev/packages/universal_ble) for Bluetooth on all platforms.
 
@@ -184,6 +187,22 @@ flutter build linux        # Linux
 ```
 
 Bluetooth permissions and entitlements are already configured in the platform projects.
+
+The app bundles a firmware package for OTA updates in [`app/assets/firmware/`](app/assets/firmware/). After changing the firmware, run [`app/scripts/sync_firmware.ps1`](app/scripts/sync_firmware.ps1) to rebuild it and copy it into the app. [`app/scripts/build_release.ps1`](app/scripts/build_release.ps1) does this and then builds the Android and Windows release files locally.
+
+## Release builds
+
+The [Build](.github/workflows/release.yml) workflow builds the firmware, the Android APK and the Windows app on GitHub Actions. The firmware is built first and bundled into both apps, so each release ships with matching firmware.
+
+- **Manual run:** Actions → Build → Run workflow. The results are available as workflow artifacts.
+- **Release:** push a tag that matches the app version in [`app/pubspec.yaml`](app/pubspec.yaml), for example:
+
+  ```bash
+  git tag v1.2.0
+  git push origin v1.2.0
+  ```
+
+  The workflow then creates a draft release containing the APK, the Windows zip and the firmware as `.zip` (DFU), `.hex` and `.uf2`. Review the draft and publish it.
 
 ## Assembly
 

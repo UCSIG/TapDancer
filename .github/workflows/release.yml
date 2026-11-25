@@ -1,0 +1,214 @@
+# Builds the firmware, the Android APK and the Windows app.
+#
+# - Manual run (Actions tab > Build > Run workflow): builds everything and
+#   uploads the results as workflow artifacts.
+# - Pushing a tag "vX.Y.Z" (must match the version in app/pubspec.yaml):
+#   additionally creates a draft GitHub release with all files attached.
+#
+# Android release signing (optional, otherwise the debug key is used):
+#   ANDROID_KEYSTORE_BASE64   base64 of the .jks keystore
+#   ANDROID_KEYSTORE_PASSWORD keystore password
+#   ANDROID_KEY_ALIAS         key alias
+#   ANDROID_KEY_PASSWORD      key password
+
+name: Build
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.50.1"
+  PIO_ENV: xiaoble_adafruit
+
+jobs:
+  version:
+    name: Read version
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.version.outputs.app }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Read app version from pubspec.yaml
+        id: version
+        run: |
+          version=$(sed -n 's/^version:[[:space:]]*\([^+[:space:]]*\).*/\1/p' app/pubspec.yaml)
+          echo "App version: $version"
+          echo "app=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check tag matches app version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          if [ "${GITHUB_REF_NAME}" != "v${{ steps.version.outputs.app }}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match app version v${{ steps.version.outputs.app }} in app/pubspec.yaml"
+            exit 1
+          fi
+
+  firmware:
+    name: Firmware
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ runner.os }}-${{ hashFiles('firmware/platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Build firmware
+        env:
+          TAPDANCER_BUILD_COUNT: ${{ github.run_number }}
+        run: pio run -d firmware -e "$PIO_ENV"
+
+      - name: Collect files
+        run: |
+          build=firmware/.pio/build/$PIO_ENV
+          mkdir -p out
+          cp "$build"/firmware_tapdancer.zip "$build"/firmware_tapdancer.hex \
+             "$build"/firmware_tapdancer.uf2 "$build"/version.json out/
+          cat out/version.json
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: firmware
+          path: out/
+          if-no-files-found: error
+
+  android:
+    name: Android app
+    needs: [version, firmware]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Bundle firmware into app assets
+        uses: actions/download-artifact@v5
+        with:
+          name: firmware
+          path: app/assets/firmware/
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Set up release signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::No signing secrets set, the APK is signed with a temporary debug key."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > app/android/app/upload-keystore.jks
+          {
+            echo "storeFile=upload-keystore.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > app/android/key.properties
+
+      - name: Build APK
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter build apk --release
+          mkdir -p ../out
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             "../out/tapdancer-v${{ needs.version.outputs.app }}-android.apk"
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: android
+          path: out/
+          if-no-files-found: error
+
+  windows:
+    name: Windows app
+    needs: [version, firmware]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Bundle firmware into app assets
+        uses: actions/download-artifact@v5
+        with:
+          name: firmware
+          path: app/assets/firmware/
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Build Windows app
+        working-directory: app
+        shell: pwsh
+        run: |
+          flutter pub get
+          flutter build windows --release
+          if ($LASTEXITCODE -ne 0) { throw 'Windows build failed.' }
+          New-Item -ItemType Directory -Force -Path ../out | Out-Null
+          Compress-Archive -Path build/windows/x64/runner/Release/* `
+            -DestinationPath "../out/tapdancer-v${{ needs.version.outputs.app }}-windows.zip"
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: windows
+          path: out/
+          if-no-files-found: error
+
+  release:
+    name: Draft release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [version, firmware, android, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: dist/
+
+      - name: Name firmware files by version
+        run: |
+          fw=$(python3 -c "import json; print(json.load(open('dist/firmware/version.json'))['version'])")
+          echo "Firmware version: $fw"
+          for ext in zip hex uf2; do
+            mv "dist/firmware/firmware_tapdancer.$ext" "dist/firmware/tapdancer-firmware-v$fw.$ext"
+          done
+          ls -R dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: TapDancer v${{ needs.version.outputs.app }}
+          generate_release_notes: true
+          files: |
+            dist/android/*.apk
+            dist/windows/*.zip
+            dist/firmware/tapdancer-firmware-*

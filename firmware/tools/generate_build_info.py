@@ -49,6 +49,13 @@ def generate_build_info():
                 build_count = -1
 
     build_count += 1
+
+    # CI builds start without a local counter file; let them pass an explicit
+    # build number instead (e.g. the GitHub Actions run number).
+    build_count_override = os.environ.get("TAPDANCER_BUILD_COUNT")
+    if build_count_override:
+        build_count = int(build_count_override)
+
     os.makedirs(os.path.dirname(build_count_file), exist_ok=True)
     with open(build_count_file, "w+") as f:
         f.writelines([str(build_count), "\n", extracted_version])
