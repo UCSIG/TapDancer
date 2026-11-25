@@ -1,6 +1,6 @@
 name: tapdancer
 description: A simple footswitch to turn pages on devices displaying musical sheet notation.
-version: 1.2.0
+version: 1.2.1
 publish_to: "none"
 
 environment:

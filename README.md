@@ -9,8 +9,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Companion App-v1.2.0-blue" alt="Release">
-  <img src="https://img.shields.io/badge/Firmware-v1.4.2-green" alt="Firmware">
+  <img src="https://img.shields.io/badge/Companion App-v1.2.1-blue" alt="Release">
+  <img src="https://img.shields.io/badge/Firmware-v1.5.0-green" alt="Firmware">
   <img src="https://img.shields.io/badge/Hardware-v1.0.0-orange" alt="Hardware">
   <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
 </p>
