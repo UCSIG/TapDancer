@@ -16,6 +16,10 @@ firmware/.pio/
 firmware/release/
 firmware/.debug_settings/*.user
 
+# Generated before every build by tools/generate_build_info.py
+firmware/src/build_info.h
+firmware/tools/helper_data/
+
 # Bootloader build checkout (see firmware/bootloader/build_bootloader.sh)
 firmware/bootloader/_work/
 

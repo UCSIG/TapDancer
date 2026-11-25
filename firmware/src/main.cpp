@@ -349,13 +349,13 @@ void init_button_behaviour(void) {
         buttons[button].setDoubleClickTime(settings->configs[config_cur].button_configs[button].timing_double_click_ms);
         buttons[button].setLongClickTime(settings->configs[config_cur].button_configs[button].timing_long_click_ms);
 
-        // Set all handlers to NULL first to avoid unintended behaviour when changing click timings.
-        buttons[button].setPressedHandler(NULL);
-        buttons[button].setReleasedHandler(NULL);
-        buttons[button].setClickHandler(NULL);
-        buttons[button].setDoubleClickHandler(NULL);
-        buttons[button].setTripleClickHandler(NULL);
-        buttons[button].setLongClickDetectedHandler(NULL);
+        // Set all handlers to nullptr first to avoid unintended behaviour when changing click timings.
+        buttons[button].setPressedHandler(nullptr);
+        buttons[button].setReleasedHandler(nullptr);
+        buttons[button].setClickHandler(nullptr);
+        buttons[button].setDoubleClickHandler(nullptr);
+        buttons[button].setTripleClickHandler(nullptr);
+        buttons[button].setLongClickDetectedHandler(nullptr);
 
         // Set button handler functions.
         // If the double click time is 0, the button is in direct mode with press and release.

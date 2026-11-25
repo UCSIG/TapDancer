@@ -19,8 +19,8 @@
 <div align="center">
   <table>
     <tr>
-      <td><img src="app/assets/images/tapdancer_closed.jpg" alt="TapDancer closed" width="370"></td>
-      <td><img src="app/assets/images/tapdancer_open.jpg" alt="TapDancer open" width="370"></td>
+      <td><img src="app/assets/images/tapdancer_closed_2.jpg" alt="TapDancer closed" width="370"></td>
+      <td><img src="app/assets/images/tapdancer_open_2.jpg" alt="TapDancer open" width="370"></td>
     </tr>
     <tr>
       <td><a href="pcb/tapdancer_v1.0/outputs/schematic/tapdancer_v1.0.pdf"><img src="pcb/tapdancer_v1.0/outputs/plots/tapdancer_v1.0_schematic_zoomed.png" alt="TapDancer Schematic" width="370"></a></td>

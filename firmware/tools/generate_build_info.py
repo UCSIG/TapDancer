@@ -49,6 +49,7 @@ def generate_build_info():
                 build_count = -1
 
     build_count += 1
+    os.makedirs(os.path.dirname(build_count_file), exist_ok=True)
     with open(build_count_file, "w+") as f:
         f.writelines([str(build_count), "\n", extracted_version])
 
