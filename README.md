@@ -145,7 +145,7 @@ The app is used to pair devices, edit configurations and update firmware.
 
 <table>
   <tr>
-    <td align="center"><b>2 simultaneous devices</b></td>
+    <td align="center"><b>Two simultaneous devices</b></td>
     <td align="center"><b>Button configurations</b></td>
     <td align="center"><b>Settings</b></td>
   </tr>
