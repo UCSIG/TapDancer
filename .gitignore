@@ -1,0 +1,53 @@
+# ---------------------------------- GENERAL --------------------------------- #
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*~
+__pycache__/
+*.pyc
+
+# --------------------------------- FIRMWARE --------------------------------- #
+# Build output and release files (published as GitHub Release assets)
+firmware/.pio/
+firmware/release/
+firmware/.debug_settings/*.user
+
+# Bootloader build checkout (see firmware/bootloader/build_bootloader.sh)
+firmware/bootloader/_work/
+
+# ------------------------------------ APP ----------------------------------- #
+# Release builds (published as GitHub Release assets).
+# Flutter specific rules live in app/.gitignore.
+app/release/
+
+# -------------------------------- LOCAL ONLY -------------------------------- #
+# Kept locally, but not published (third-party files, personal notes, raw data)
+firmware/TODO
+app/TODO
+firmware/docu/
+pcb/tapdancer_v1.0/datasheets/
+pcb/tapdancer_v1.0/3D/
+pcb/tapdancer_v1.0/modules/
+pcb/tapdancer_v1.0/outputs/blender/
+pcb/tapdancer_v1.0/outputs/step/
+pcb/tapdancer_v1.0/outputs/gerber_*_ordered_*.zip
+
+# ----------------------------------- KICAD ---------------------------------- #
+*.bak
+*.bck
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*-backups/
+*.kicad_prl
+*.lck
+_autosave-*
+*auto_saved_files#
+fp-info-cache
+*.net
+*.dsn
+*.ses
+*.csv

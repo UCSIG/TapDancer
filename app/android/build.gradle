@@ -1,0 +1,38 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+// file_picker 11 stops applying the Kotlin plugin under AGP 9, assuming built-in
+// Kotlin is enabled. This project keeps built-in Kotlin off (other plugins, e.g.
+// flutter_plugin_android_lifecycle, still apply the legacy Kotlin plugin), so we
+// apply it to the file_picker module ourselves — right after its Android library
+// plugin, matching how the working plugins do it.
+subprojects {
+    if (project.name == 'file_picker') {
+        project.plugins.withId('com.android.library') {
+            if (!project.plugins.hasPlugin('org.jetbrains.kotlin.android')) {
+                project.apply plugin: 'org.jetbrains.kotlin.android'
+            }
+        }
+        project.afterEvaluate {
+            if (project.extensions.findByName('android') != null) {
+                project.android.kotlinOptions { jvmTarget = '17' }
+            }
+        }
+    }
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
+}

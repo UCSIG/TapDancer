@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: UCSIG <65302813+UCSIG@users.noreply.github.com>
+Date: Mon, 16 Dec 2024 18:31:27 +0100
+Subject: [PATCH] Increase HCI_RX_BUF_QUEUE_SIZE from 8 to 16
+
+With the default queue size of 8, every BLE OTA update (Nordic Legacy
+DFU) to the Seeed XIAO nRF52840 failed. Raising the HCI RX buffer queue
+to 16 fixes it.
+
+See https://github.com/adafruit/Adafruit_nRF52_Bootloader/issues/306
+---
+ src/sdk_config.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/sdk_config.h b/src/sdk_config.h
+index 50e8196..4e55b17 100644
+--- a/src/sdk_config.h
++++ b/src/sdk_config.h
+@@ -66,7 +66,7 @@
+ #define HCI_MEM_POOL_ENABLED               1
+ #define HCI_TX_BUF_SIZE                    600 // not used
+ #define HCI_RX_BUF_SIZE                    600
+-#define HCI_RX_BUF_QUEUE_SIZE              8   // must be power of 2
++#define HCI_RX_BUF_QUEUE_SIZE              16   // must be power of 2
+ 
+ //==========================================================
+ // <e> UART_ENABLED - nrf_drv_uart - UART/UARTE peripheral driver

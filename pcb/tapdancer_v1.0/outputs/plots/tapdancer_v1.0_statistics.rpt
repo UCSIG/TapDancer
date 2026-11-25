@@ -1,0 +1,64 @@
+PCB statistics report
+=====================
+- Date: 17.06.2026 12:27:10
+- Project: tapdancer_v1.0
+- Board name: tapdancer_v1.0
+
+Board
+-----
+- Width: 54,2050 mm
+- Height: 45,5500 mm
+- Area: 2308,538 mm²
+- Front copper area: 1563,404 mm²
+- Back copper area: 1797,859 mm²
+- Min track clearance: 0,1270 mm
+- Min track width: 0,1500 mm
+- Min drill diameter: 0,3000 mm
+- Board stackup thickness: 1,6000 mm
+
+- Front footprint area: 1301,944 mm²
+- Back footprint area: 167,843 mm²
+- Front component density: 56,40 %
+- Back component density: 7,27 %
+Pads
+----
+- Through hole: 51
+- SMD: 185
+- Connector: 6
+- NPTH: 6
+- Castellated: 0
+- Press-fit: 0
+
+Vias
+----
+- Through vias: 91
+- Blind vias: 0
+- Buried vias: 0
+- Micro vias: 0
+
+Components
+----------
+
+|              | Front Side | Back Side | Total |
+|--------------|------------|-----------|-------|
+|THT:          |         11 |         0 |    11 |
+|SMD:          |         74 |         0 |    74 |
+|Unspecified:  |          6 |         0 |     6 |
+|Total:        |         91 |         0 |    91 |
+
+Drill holes
+-----------
+
+| Count | Shape |    X Size |    Y Size | Plated | Via/Pad | Start Layer | Stop Layer |
+|-------|-------|-----------|-----------|--------|---------|-------------|------------|
+|    91 | Round | 0,3000 mm | 0,3000 mm |    PTH |     Via |        F.Cu |       B.Cu |
+|    28 | Round | 1,0000 mm | 1,0000 mm |    PTH |     Pad |        F.Cu |       B.Cu |
+|    11 | Round | 0,3000 mm | 0,3000 mm |    PTH |     Pad |        F.Cu |       B.Cu |
+|     4 | Round | 1,7000 mm | 1,7000 mm |    PTH |     Pad |        F.Cu |       B.Cu |
+|     3 | Round | 0,9906 mm | 0,9906 mm |   NPTH |     Pad |        F.Cu |       B.Cu |
+|     2 | Round | 0,6500 mm | 0,6500 mm |   NPTH |     Pad |        F.Cu |       B.Cu |
+|     2 |  Slot | 0,6000 mm | 1,7000 mm |    PTH |     Pad |        F.Cu |       B.Cu |
+|     2 |  Slot | 0,6000 mm | 1,4000 mm |    PTH |     Pad |        F.Cu |       B.Cu |
+|     2 | Round | 1,1000 mm | 1,1000 mm |    PTH |     Pad |        F.Cu |       B.Cu |
+|     2 | Round | 0,7500 mm | 0,7500 mm |    PTH |     Pad |        F.Cu |       B.Cu |
+|     1 | Round | 0,8000 mm | 0,8000 mm |   NPTH |     Pad |        F.Cu |       B.Cu |
