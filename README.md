@@ -150,9 +150,9 @@ The app is used to pair devices, edit configurations and update firmware.
     <td align="center"><b>Settings</b></td>
   </tr>
   <tr>
-    <td><img src="app/assets/screenshots/android/devices.png" alt="Devices screen" width="280"></td>
-    <td><img src="app/assets/screenshots/android/button_configurations.png" alt="Button configurations screen" width="280"></td>
-    <td><img src="app/assets/screenshots/android/settings.png" alt="Settings screen" width="280"></td>
+    <td><img src="app/assets/screenshots/android/devices.png" alt="Devices screen" width="270"></td>
+    <td><img src="app/assets/screenshots/android/button_configurations.png" alt="Button configurations screen" width="270"></td>
+    <td><img src="app/assets/screenshots/android/settings.png" alt="Settings screen" width="270"></td>
   </tr>
 </table>
 
@@ -217,7 +217,7 @@ The [Build](.github/workflows/release.yml) workflow builds the firmware, the And
 7. Mount the PCB in the pedal and set it up with the [companion app](#companion-app).
 
 > [!WARNING]
-> Check the polarity of the battery plug before connecting it. Many cells are sold with reversed JST polarity. Compare against the silkscreen and re-pin the connector if necessary; a reversed cell can destroy the board.
+> Check the polarity of the battery plug before connecting it. Many cells are sold with reversed JST polarity. Compare against the silkscreen and re-pin the connector if necessary.
 
 ## Configuration protocol
 
