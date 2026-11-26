@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,6 +97,13 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
     addSection('Saved', saved);
     addSection('Available', available);
 
+    if (kIsWeb && sections.isNotEmpty) {
+      sections.add(Padding(
+        padding: const EdgeInsets.only(top: AppSizing.paddingMedium),
+        child: Center(child: _pairWebButton()),
+      ));
+    }
+
     final bleUnavailable = bleState.bleOff || bleState.blePermissionDenied || bleState.bleUnsupported;
 
     return GradientScaffold(
@@ -141,8 +148,8 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
       );
     } else {
       title = 'Bluetooth is off';
-      message = Platform.isAndroid ? 'Turn Bluetooth on to find and connect to your TapDancer.' : 'Turn Bluetooth on in your system settings to find and connect to your TapDancer.';
-      if (Platform.isAndroid) {
+      message = !kIsWeb && defaultTargetPlatform == TargetPlatform.android ? 'Turn Bluetooth on to find and connect to your TapDancer.' : 'Turn Bluetooth on in your system settings to find and connect to your TapDancer.';
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
         action = FilledButton.icon(
           onPressed: () => ref.read(bleProvider.notifier).enableBluetooth(),
           icon: const Icon(Icons.bluetooth),
@@ -204,11 +211,25 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
         children: [
           Icon(Icons.bluetooth_searching, size: 64, color: AppColor.textTertiary),
           const SizedBox(height: AppSizing.paddingMedium),
-          Text('Scanning for devices…', style: AppTextStyles.headerMedium),
+          Text(kIsWeb ? 'No device paired' : 'Scanning for devices…', style: AppTextStyles.headerMedium),
           const SizedBox(height: AppSizing.paddingSmall),
           Text('Make sure your TapDancer is powered on.', style: AppTextStyles.bodyLarge, textAlign: TextAlign.center),
+          if (kIsWeb) ...[
+            const SizedBox(height: AppSizing.paddingLarge),
+            _pairWebButton(),
+          ],
         ],
       ),
+    );
+  }
+
+  /// Web Bluetooth can't scan in the background: the browser chooser has to be
+  /// opened from a tap, so web gets an explicit pair button.
+  Widget _pairWebButton() {
+    return FilledButton.icon(
+      onPressed: () => ref.read(bleProvider.notifier).pairWebDevice(),
+      icon: const Icon(Icons.bluetooth_searching),
+      label: const Text('Pair TapDancer'),
     );
   }
 

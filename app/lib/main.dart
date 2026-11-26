@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -19,7 +19,7 @@ import 'package:tapdancer/utils/preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (!Platform.isAndroid) {
+  if (defaultTargetPlatform != TargetPlatform.android) {
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -36,7 +36,7 @@ void main() async {
   await PackageInformation.init();
 
   // Set windows specific settings.
-  if (Platform.isWindows) {
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
     final window = WindowManager.instance.getCurrent();
     if (window != null) {
       final windowSize = const Size(AppColor.windowWidth, AppColor.windowHeightRegularWindows).toNative();
@@ -50,7 +50,7 @@ void main() async {
   }
 
   // Check required permissions.
-  if (await Permission.bluetoothScan.request().isDenied || await Permission.bluetoothConnect.request().isDenied) {
+  if (!kIsWeb && (await Permission.bluetoothScan.request().isDenied || await Permission.bluetoothConnect.request().isDenied)) {
     logger.e("BLE permissions denied!");
   }
 

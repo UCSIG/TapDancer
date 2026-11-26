@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,7 +37,7 @@ class _BottomNavigationBarWidgetState extends ConsumerState<BottomNavigationBarW
         border: Border(
           top: BorderSide(
             color: Colors.grey, // Line color
-            width: Platform.isWindows ? 0.5 : 0.0, // Thin line thickness
+            width: defaultTargetPlatform == TargetPlatform.windows ? 0.5 : 0.0, // Thin line thickness
           ),
         ),
       ),

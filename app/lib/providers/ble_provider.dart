@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:universal_ble/universal_ble.dart';
 import 'package:logger/logger.dart';
@@ -290,20 +289,21 @@ class BLENotifier extends StateNotifier<BLEState> {
     // Devices the OS is already connected to don't show up in scans. They
     // still need a regular connect() so the plugin attaches to them.
     final systemIds = <String>{};
-    try {
-      final systemDevices = await UniversalBle.getSystemDevices(withServices: []);
-      for (final sys in systemDevices) {
-        final name = sys.name;
-        if (name == null || !name.contains(bleScanNameFilter)) continue;
-        final key = sys.deviceId.toLowerCase();
-        final d = _devices[key] ?? (_devices[key] = TapDancerDevice(id: sys.deviceId, name: name));
-        d.bleDevice = sys;
-        systemIds.add(key);
+    if (!kIsWeb)
+      try {
+        final systemDevices = await UniversalBle.getSystemDevices(withServices: []);
+        for (final sys in systemDevices) {
+          final name = sys.name;
+          if (name == null || !name.contains(bleScanNameFilter)) continue;
+          final key = sys.deviceId.toLowerCase();
+          final d = _devices[key] ?? (_devices[key] = TapDancerDevice(id: sys.deviceId, name: name));
+          d.bleDevice = sys;
+          systemIds.add(key);
+        }
+        _emit();
+      } catch (e) {
+        _logger.e("getSystemDevices failed: $e");
       }
-      _emit();
-    } catch (e) {
-      _logger.e("getSystemDevices failed: $e");
-    }
 
     // Snapshot: callbacks may mutate the map.
     for (final d in _devices.values.toList()) {
@@ -314,7 +314,36 @@ class BLENotifier extends StateNotifier<BLEState> {
     _logger.d("Auto-connect pass finished.");
   }
 
+  /// Web only: opens the browser's Bluetooth chooser and connects the picked
+  /// device. Must be called directly from a user gesture (e.g. a button tap),
+  /// otherwise Chrome rejects it with MissingUserGestureError.
+  Future<void> pairWebDevice() async {
+    try {
+      // No awaits before this call: the user-gesture activation must still be valid.
+      await UniversalBle.startScan(
+        scanFilter: ScanFilter(withNamePrefix: [bleScanNameFilter, dfuAdvertisedNamePrefix]),
+        // Web Bluetooth only grants access to services listed up front.
+        platformConfig: PlatformConfig(web: WebOptions(optionalServices: [_uartService, _batteryService])),
+      );
+    } catch (e) {
+      // Also thrown when the user just closes the chooser.
+      _logger.w("Web pairing cancelled or failed: $e");
+      return;
+    }
+
+    // The picked device arrives via onScanResult; connect it right away.
+    for (final d in _devices.values.toList()) {
+      if (d.scantimeMs != 0 && !d.connected && !d.setupOngoing) {
+        if (DateTime.now().millisecondsSinceEpoch - d.scantimeMs < 5000) {
+          await connectDevice(d.id);
+        }
+      }
+    }
+  }
+
   Future<void> _startScan() async {
+    // Web can't scan in the background; devices are picked via pairWebDevice().
+    if (kIsWeb) return;
     if (_availability != AvailabilityState.poweredOn) return;
     try {
       // Android throttles frequent scan starts, so don't restart a running scan.
@@ -477,7 +506,7 @@ class BLENotifier extends StateNotifier<BLEState> {
     try {
       await UniversalBle.discoverServices(d.id);
       await UniversalBle.subscribeNotifications(d.id, _uartService, _uartRxNotifyChar);
-      if (Platform.isAndroid) {
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
         await UniversalBle.requestMtu(d.id, _bleMtu);
       }
     } catch (e) {
@@ -577,8 +606,7 @@ class BLENotifier extends StateNotifier<BLEState> {
       _reconnectBackoff.remove(key);
     } else if (result != ConnectErrors.inProgress) {
       final failures = (backoff?.failures ?? 0) + 1;
-      final delayMs = (_reconnectBackoffBase.inMilliseconds * (1 << (failures - 1).clamp(0, 16)))
-          .clamp(0, _reconnectBackoffMax.inMilliseconds);
+      final delayMs = (_reconnectBackoffBase.inMilliseconds * (1 << (failures - 1).clamp(0, 16))).clamp(0, _reconnectBackoffMax.inMilliseconds);
       _reconnectBackoff[key] = (
         failures: failures,
         nextAttempt: DateTime.now().add(Duration(milliseconds: delayMs)),
@@ -609,8 +637,7 @@ class BLENotifier extends StateNotifier<BLEState> {
       return SendCommandErrors.success;
     } on UniversalBleException catch (e) {
       // Link is down: the connection-change event updates state, no retry.
-      if (e.code == UniversalBleErrorCode.deviceDisconnected ||
-          e.code == UniversalBleErrorCode.operationCancelled) {
+      if (e.code == UniversalBleErrorCode.deviceDisconnected || e.code == UniversalBleErrorCode.operationCancelled) {
         return SendCommandErrors.deviceNotConnected;
       }
       _logger.e("Failed to send command ${utf8.decode(command).trim()} to ${_dbg(d)}: $e");
@@ -642,7 +669,7 @@ class BLENotifier extends StateNotifier<BLEState> {
 
   /// Polls live RSSI (Android/iOS/macOS only).
   Future<void> _refreshRssi() async {
-    if (!(Platform.isAndroid || Platform.isIOS || Platform.isMacOS)) return;
+    if (kIsWeb || (defaultTargetPlatform == TargetPlatform.windows)) return;
 
     for (final d in _devices.values.toList()) {
       if (!d.connected || d.disconnecting) continue;

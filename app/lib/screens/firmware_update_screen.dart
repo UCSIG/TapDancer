@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -36,7 +37,7 @@ class _FirmwareUpdateScreenState extends ConsumerState<FirmwareUpdateScreen> {
   String? _error;
 
   /// nordic_dfu ships native implementations for these platforms only.
-  bool get _supported => Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
+  bool get _supported => !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS);
 
   bool get _busy => _stage == _DfuStage.preparing || _stage == _DfuStage.uploading;
 
