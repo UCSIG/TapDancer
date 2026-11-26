@@ -150,9 +150,9 @@ The app is used to pair devices, edit configurations and update firmware.
     <td align="center"><b>Settings</b></td>
   </tr>
   <tr>
-    <td><img src="app/assets/screenshots/android/devices.png" alt="Devices screen" width="260"></td>
-    <td><img src="app/assets/screenshots/android/button_configurations.png" alt="Button configurations screen" width="260"></td>
-    <td><img src="app/assets/screenshots/android/settings.png" alt="Settings screen" width="260"></td>
+    <td><img src="app/assets/screenshots/android/devices.png" alt="Devices screen" width="250"></td>
+    <td><img src="app/assets/screenshots/android/button_configurations.png" alt="Button configurations screen" width="250"></td>
+    <td><img src="app/assets/screenshots/android/settings.png" alt="Settings screen" width="250"></td>
   </tr>
 </table>
 
