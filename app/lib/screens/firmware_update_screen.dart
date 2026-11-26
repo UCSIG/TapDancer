@@ -37,7 +37,7 @@ class _FirmwareUpdateScreenState extends ConsumerState<FirmwareUpdateScreen> {
   String? _error;
 
   /// nordic_dfu ships native implementations for these platforms only.
-  bool get _supported => !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.macOS);
+  bool get _supported => !kIsWeb && (defaultTargetPlatform != TargetPlatform.windows);
 
   bool get _busy => _stage == _DfuStage.preparing || _stage == _DfuStage.uploading;
 
@@ -187,8 +187,7 @@ class _FirmwareUpdateScreenState extends ConsumerState<FirmwareUpdateScreen> {
                 Icon(Icons.new_releases, size: 14, color: AppColor.warning),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text('In bootloader — reinstall firmware to recover.',
-                      style: AppTextStyles.caption.copyWith(color: AppColor.warning, fontWeight: FontWeight.w600)),
+                  child: Text('In bootloader — reinstall firmware to recover.', style: AppTextStyles.caption.copyWith(color: AppColor.warning, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),
@@ -198,14 +197,12 @@ class _FirmwareUpdateScreenState extends ConsumerState<FirmwareUpdateScreen> {
               children: [
                 Icon(Icons.new_releases, size: 14, color: AppColor.warning),
                 const SizedBox(width: 4),
-                Text('Firmware update available.',
-                    style: AppTextStyles.caption.copyWith(color: AppColor.warning, fontWeight: FontWeight.w600)),
+                Text('Firmware update available.', style: AppTextStyles.caption.copyWith(color: AppColor.warning, fontWeight: FontWeight.w600)),
               ],
             ),
           ] else if (upToDate) ...[
             const SizedBox(height: 2),
-            Text('This device is already up to date.',
-                style: AppTextStyles.caption.copyWith(color: AppColor.success)),
+            Text('This device is already up to date.', style: AppTextStyles.caption.copyWith(color: AppColor.success)),
           ],
         ],
       ),
